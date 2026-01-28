@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { REQUEST_DELAY_MS } from './constants';
 
 export async function sleep(ms: number): Promise<void> {

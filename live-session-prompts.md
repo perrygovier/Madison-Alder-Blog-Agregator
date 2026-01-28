@@ -213,3 +213,18 @@ Given the current state of the repo, propose the **simplest** path to a working,
 
 - You can tweak any of these prompts on the fly; they’re starting points, not scripts.
 
+---
+
+## Dry Run – Lessons Learned
+
+These are notes from a full rehearsal using the `run-1` folder. You can mention them out loud or just keep them in mind as guardrails.
+
+- **Scraper delay tuning**: A 750ms delay between requests felt too slow for the live demo; 200ms was a good balance between being polite to the city’s servers and keeping things moving. If the site feels sluggish or the network is flaky, feel free to nudge this constant up or down.
+- **Keep the stack boring**: Node 20’s built-in `fetch` works fine—no need for `node-fetch`. This keeps dependencies lighter and avoids TypeScript type issues. If you see TS complaining about `fetch`, make sure the `lib` option in `tsconfig.json` includes `DOM`.
+- **Directory creation gotchas**: Remember that `public/` needs to exist before copying JSON into it. Using `mkdir -p public && cp ...` in the `build:site` script avoids “No such file or directory” surprises on stage.
+- **End-to-end commands to demo**:
+  - From `run-1/`: `npm run scrape` to show data fetching.
+  - Then `npm run build:site` (or `npm run build` for scraper + site + RSS).
+  - Then `npm run dev` and open the printed localhost URL.
+- **If time is tight**: You can skip the GitHub Action and/or RSS stage and still have a compelling story with the scraper + static site alone.
+

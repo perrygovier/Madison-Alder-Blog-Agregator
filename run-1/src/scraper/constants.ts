@@ -1,4 +1,7 @@
-export const REQUEST_DELAY_MS = 750;
+// Delay between HTTP requests, in milliseconds.
+// Tuned down after a dry run from 750ms to 200ms
+// to keep the scraper polite but faster for the live demo.
+export const REQUEST_DELAY_MS = 200;
 
 export const SELECTORS = {
   list: {
