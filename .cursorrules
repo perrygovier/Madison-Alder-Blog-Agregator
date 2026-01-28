@@ -49,7 +49,8 @@ Set up the basic project structure with Node.js, Express, and initial configurat
 5. Create a `.gitignore` file with:
    ```
    node_modules/
-   data/*.json
+   data/
+   !data/.gitkeep
    .env
    *.log
    ```
@@ -88,11 +89,12 @@ Each post object should have:
   title: "Post Title",
   link: "https://...",
   excerpt: "Brief description...",
-  publishDate: "2024-01-15",
+  publishDate: "2024-01-15", // ISO date string or Date object
   source: "Source Name",
-  scrapedAt: "2024-01-15T10:30:00.000Z"
+  scrapedAt: "2024-01-15T10:30:00.000Z" // ISO timestamp
 }
 ```
+Note: Different sources may provide dates in different formats. Parse them into consistent ISO strings.
 
 ### Verification
 - Test the scraper independently with a test script
@@ -143,12 +145,12 @@ Create an attractive display of blog posts on the main page.
    - Add a header with project title "Madison-Alder Blog Aggregator"
    - Create a container for blog posts
    - Loop through posts and display each as a card:
-     - Post title (linked to original)
+     - Post title (linked to original with `target="_blank" rel="noopener noreferrer"`)
      - Source name
-     - Excerpt (first 150 characters)
-     - Publish date (formatted)
-   - Show a message if no posts are available
-   - Add a "Refresh" button to force re-scraping
+     - Excerpt (first 150 characters, truncate at word boundary and add "...")
+     - Publish date (formatted in a readable format like "Jan 15, 2024")
+   - Show appropriate messages: "Loading posts..." (if applicable), "No posts found" (if scraping succeeded but returned nothing), or error message (if scraping failed)
+   - Add a "Refresh" button (as a form with POST method) to force re-scraping
 2. Create a POST route `/refresh` that:
    - Clears the cache
    - Forces a new scrape
@@ -159,9 +161,10 @@ Create an attractive display of blog posts on the main page.
 
 ### Verification
 - Verify all posts display correctly
-- Check that links open in new tabs
-- Test the refresh functionality
-- Ensure dates are readable
+- Check that links to original posts open in new tabs securely
+- Test the refresh functionality (clears cache and re-scrapes)
+- Ensure dates are formatted in a readable way
+- Verify appropriate messages appear when there are no posts or errors occur
 
 ---
 
@@ -179,9 +182,10 @@ Add professional styling to make the site visually appealing.
    - Responsive design (mobile-friendly)
    - Color scheme (consider Madison/Wisconsin theme)
 2. Add a favicon
-3. Implement loading states:
-   - Show "Loading..." when fetching posts
+3. Improve error handling and user feedback:
+   - Show appropriate messages for different states (no posts, errors)
    - Handle errors gracefully with user-friendly messages
+   - Consider adding a last-updated timestamp display
 4. Add metadata:
    - Page title, description
    - Open Graph tags for social sharing
@@ -244,10 +248,11 @@ Add scraping from multiple local blog sources.
 - Commit working code after each stage
 
 ### Common Issues
-- CORS errors: Make sure scraping is done server-side
-- Parsing errors: HTML structures vary; adjust selectors
-- Rate limiting: Implement delays between requests
-- Stale cache: Check timestamp logic carefully
+- CORS errors: Make sure scraping is done server-side, not in browser
+- Parsing errors: HTML structures vary; adjust selectors as needed for each source
+- Rate limiting: If scraping multiple sources, add delays (e.g., 500ms) between requests to avoid overwhelming servers
+- Stale cache: Check timestamp logic carefully; ensure cache invalidation works
+- Date parsing: Different sources use different date formats; handle gracefully
 
 ### Resources
 - Express docs: https://expressjs.com/
