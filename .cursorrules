@@ -1,0 +1,277 @@
+# Madison-Alder Blog Aggregator - Development Instructions
+
+This project is a blog aggregator for Madison and surrounding area blogs and news sources. Follow these staged instructions to build the application step by step. Complete each stage fully and verify it works before moving to the next stage.
+
+## Project Overview
+Build a basic website that aggregates and displays blog posts from local Madison-area sources using a web scraper.
+
+---
+
+## STAGE 1: Project Setup and Structure
+
+### Goal
+Set up the basic project structure with Node.js, Express, and initial configuration.
+
+### Tasks
+1. Initialize a Node.js project with `npm init -y`
+2. Install core dependencies:
+   - Express for web server: `npm install express`
+   - EJS for templating: `npm install ejs`
+   - Axios for HTTP requests: `npm install axios`
+   - Cheerio for HTML parsing: `npm install cheerio`
+   - Nodemon for development: `npm install --save-dev nodemon`
+3. Create the following directory structure:
+   ```
+   /
+   ├── server.js          # Main server file
+   ├── scrapers/          # Scraper modules
+   │   └── index.js       # Scraper orchestrator
+   ├── views/             # EJS templates
+   │   ├── index.ejs      # Main page
+   │   └── partials/      # Reusable components
+   │       ├── header.ejs
+   │       └── footer.ejs
+   ├── public/            # Static assets
+   │   ├── css/
+   │   │   └── style.css
+   │   └── js/
+   │       └── main.js
+   └── data/              # Cached data (gitignored)
+       └── .gitkeep
+   ```
+4. Update package.json scripts:
+   ```json
+   "scripts": {
+     "start": "node server.js",
+     "dev": "nodemon server.js"
+   }
+   ```
+5. Create a `.gitignore` file with:
+   ```
+   node_modules/
+   data/*.json
+   .env
+   *.log
+   ```
+
+### Verification
+- Run `npm install` successfully
+- Verify all directories are created
+- Check that `.gitignore` is working
+
+---
+
+## STAGE 2: Basic Web Scraper
+
+### Goal
+Create a web scraper that can fetch and parse blog posts from at least one local source.
+
+### Tasks
+1. In `scrapers/index.js`, create a scraper function that:
+   - Uses Axios to fetch HTML from a blog URL
+   - Uses Cheerio to parse the HTML
+   - Extracts: title, link, excerpt/description, publish date, source name
+   - Returns an array of post objects
+2. Start with one reliable source (suggestions: a local WordPress blog or news site)
+3. Add error handling for failed requests
+4. Implement a simple caching mechanism to avoid repeated requests:
+   - Save scraped data to `data/posts.json`
+   - Include a timestamp
+   - Only re-scrape if cache is older than 30 minutes
+5. Add a function to get posts (from cache if fresh, or scrape if stale)
+
+### Data Structure
+Each post object should have:
+```javascript
+{
+  id: "unique-id",
+  title: "Post Title",
+  link: "https://...",
+  excerpt: "Brief description...",
+  publishDate: "2024-01-15",
+  source: "Source Name",
+  scrapedAt: "2024-01-15T10:30:00.000Z"
+}
+```
+
+### Verification
+- Test the scraper independently with a test script
+- Verify data is saved to `data/posts.json`
+- Confirm cache mechanism works (check timestamps)
+- Ensure at least 5-10 posts are retrieved
+
+---
+
+## STAGE 3: Basic Express Server
+
+### Goal
+Create a working web server that serves the main page.
+
+### Tasks
+1. In `server.js`:
+   - Set up Express app
+   - Configure EJS as the view engine
+   - Serve static files from `/public`
+   - Create a GET route for `/` that renders `index.ejs`
+   - Add a GET route for `/api/posts` that returns JSON
+   - Set server to listen on port 3000
+2. Create basic EJS templates:
+   - `views/partials/header.ejs`: Basic HTML head, navigation
+   - `views/partials/footer.ejs`: Footer with copyright
+   - `views/index.ejs`: Main page structure (include header/footer)
+3. In the `/` route:
+   - Get posts using the scraper
+   - Pass posts data to the template
+   - Handle errors gracefully
+
+### Verification
+- Start server with `npm run dev`
+- Navigate to `http://localhost:3000`
+- Verify page loads without errors
+- Check `/api/posts` returns JSON data
+- Confirm posts are displayed on the page
+
+---
+
+## STAGE 4: Frontend Display
+
+### Goal
+Create an attractive display of blog posts on the main page.
+
+### Tasks
+1. Update `views/index.ejs`:
+   - Add a header with project title "Madison-Alder Blog Aggregator"
+   - Create a container for blog posts
+   - Loop through posts and display each as a card:
+     - Post title (linked to original)
+     - Source name
+     - Excerpt (first 150 characters)
+     - Publish date (formatted)
+   - Show a message if no posts are available
+   - Add a "Refresh" button to force re-scraping
+2. Create a POST route `/refresh` that:
+   - Clears the cache
+   - Forces a new scrape
+   - Redirects back to home page
+3. Add basic interactivity in `public/js/main.js`:
+   - Format dates in a friendly way
+   - Add click handlers if needed
+
+### Verification
+- Verify all posts display correctly
+- Check that links open in new tabs
+- Test the refresh functionality
+- Ensure dates are readable
+
+---
+
+## STAGE 5: Styling and Polish
+
+### Goal
+Add professional styling to make the site visually appealing.
+
+### Tasks
+1. In `public/css/style.css`, add styles for:
+   - Overall layout (centered, max-width container)
+   - Header/navigation bar
+   - Post cards (border, shadow, padding, hover effects)
+   - Typography (readable fonts, proper spacing)
+   - Responsive design (mobile-friendly)
+   - Color scheme (consider Madison/Wisconsin theme)
+2. Add a favicon
+3. Implement loading states:
+   - Show "Loading..." when fetching posts
+   - Handle errors gracefully with user-friendly messages
+4. Add metadata:
+   - Page title, description
+   - Open Graph tags for social sharing
+5. Consider accessibility:
+   - Proper heading hierarchy
+   - Alt text for any images
+   - Good color contrast
+
+### Optional Enhancements
+- Add filtering by source
+- Add search functionality
+- Add sorting options (by date, source)
+- Add pagination if many posts
+- Display post thumbnails if available
+
+### Verification
+- Test on different screen sizes
+- Verify all interactive elements work
+- Check console for any errors
+- Test with various amounts of data
+
+---
+
+## STAGE 6: Multiple Sources (Extension)
+
+### Goal
+Add scraping from multiple local blog sources.
+
+### Tasks
+1. Refactor `scrapers/` to support multiple sources:
+   - Create separate scraper files for each source
+   - Create a source configuration file
+   - Update orchestrator to combine results
+2. Add at least 2-3 more sources:
+   - Local news sites
+   - Madison blogs
+   - Community websites
+3. Sort combined results by date (newest first)
+4. Add source indicators in the UI
+
+### Verification
+- Verify posts from all sources appear
+- Check that sources are properly labeled
+- Confirm sorting works correctly
+
+---
+
+## Development Guidelines
+
+### Code Style
+- Use clear, descriptive variable names
+- Add comments for complex logic
+- Keep functions small and focused
+- Handle errors gracefully
+
+### Testing Each Stage
+- Complete one stage fully before moving to the next
+- Test manually after each stage
+- Fix any issues before proceeding
+- Commit working code after each stage
+
+### Common Issues
+- CORS errors: Make sure scraping is done server-side
+- Parsing errors: HTML structures vary; adjust selectors
+- Rate limiting: Implement delays between requests
+- Stale cache: Check timestamp logic carefully
+
+### Resources
+- Express docs: https://expressjs.com/
+- Cheerio docs: https://cheerio.js.org/
+- EJS docs: https://ejs.co/
+
+---
+
+## Success Criteria
+
+The project is complete when:
+1. ✅ Server runs without errors
+2. ✅ Scraper successfully fetches from at least one source
+3. ✅ Posts display correctly on the homepage
+4. ✅ Site is styled and responsive
+5. ✅ Cache mechanism works to avoid excessive scraping
+6. ✅ All links work and open properly
+
+---
+
+## Notes for Cursor/AI Agent
+
+- Ask clarifying questions if any step is unclear
+- Show your work after completing each stage
+- If a scraper fails, try a different source or ask for help
+- Prioritize getting something working over perfection
+- Keep the user informed of progress
